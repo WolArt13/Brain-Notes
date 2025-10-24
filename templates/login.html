@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Вход - Brain Notes</title>
-
     <style>
         * {
             margin: 0;
@@ -21,11 +20,9 @@
             overflow-x: hidden;
         }
 
-        /* Floating shapes */
         .shape {
             position: absolute;
             border-radius: 50%;
-            background: rgba(0, 217, 255, 0.1);
             animation: float 20s infinite ease-in-out;
         }
 
@@ -40,6 +37,7 @@
             height: 80px;
             top: 10%;
             left: 10%;
+            background: rgba(0, 217, 255, 0.1);
             animation-delay: 0s;
         }
 
@@ -61,7 +59,6 @@
             animation-delay: 10s;
         }
 
-        /* Auth container */
         .auth-container {
             min-height: 100vh;
             display: flex;
@@ -168,10 +165,6 @@
             box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
-        .submit-button:active {
-            transform: translateY(0);
-        }
-
         .form-footer {
             text-align: center;
             margin-top: 1.5rem;
@@ -247,15 +240,13 @@
             }
         }
     </style>
-
 </head>
 <body>
-    <!-- Floating shapes -->
     <div class="shape"></div>
     <div class="shape"></div>
     <div class="shape"></div>
 
-    <a href="/" class="back-link">← Вернуться на главную</a>
+    <a href="index.html" class="back-link">← Вернуться на главную</a>
 
     <div class="auth-container">
         <div class="auth-card">
@@ -284,15 +275,14 @@
             </form>
 
             <div class="form-footer">
-                <a href="/auth/forgot-password">Забыли пароль?</a>
+                <a href="forgot-password.html">Забыли пароль?</a>
             </div>
 
             <div class="form-footer">
-                Нет аккаунта? <a href="/auth/register">Зарегистрироваться</a>
+                Нет аккаунта? <a href="register.html">Зарегистрироваться</a>
             </div>
         </div>
     </div>
-
 
     <script>
         function showError(message) {
@@ -311,9 +301,7 @@
             messageEl.className = 'message success';
             messageEl.style.display = 'block';
         }
-    </script>
 
-    <script>
         async function handleLogin(event) {
             event.preventDefault();
 
@@ -325,17 +313,15 @@
                 const response = await fetch('/auth/login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                    body: formData
+                    body: formData,
+                    credentials: 'include'  // ✅ Включаем отправку/получение cookies
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    // Store tokens
-                    localStorage.setItem('access_token', data.access_token);
-                    localStorage.setItem('refresh_token', data.refresh_token);
-
                     showSuccess('Вход выполнен успешно!');
+                    // Куки уже установлены автоматически сервером!
                     setTimeout(() => window.location.href = '/dashboard', 1500);
                 } else {
                     showError(data.detail || 'Ошибка входа');

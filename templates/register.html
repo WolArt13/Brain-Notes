@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Регистрация - Brain Notes</title>
-
     <style>
         * {
             margin: 0;
@@ -21,11 +20,9 @@
             overflow-x: hidden;
         }
 
-        /* Floating shapes */
         .shape {
             position: absolute;
             border-radius: 50%;
-            background: rgba(0, 217, 255, 0.1);
             animation: float 20s infinite ease-in-out;
         }
 
@@ -40,6 +37,7 @@
             height: 80px;
             top: 10%;
             left: 10%;
+            background: rgba(0, 217, 255, 0.1);
             animation-delay: 0s;
         }
 
@@ -61,7 +59,6 @@
             animation-delay: 10s;
         }
 
-        /* Auth container */
         .auth-container {
             min-height: 100vh;
             display: flex;
@@ -163,13 +160,38 @@
             margin-top: 1rem;
         }
 
-        .submit-button:hover {
+        .submit-button:hover:not(:disabled) {
             transform: translateY(-2px);
             box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
         }
 
-        .submit-button:active {
-            transform: translateY(0);
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .resend-button {
+            width: 100%;
+            padding: 1rem;
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            color: #ffffff;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .resend-button:hover:not(:disabled) {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px);
+        }
+
+        .resend-button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         .form-footer {
@@ -236,6 +258,32 @@
             color: #86efac;
         }
 
+        .message.info {
+            background: rgba(59, 130, 246, 0.2);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #93c5fd;
+        }
+
+        .email-sent-info {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            color: #86efac;
+            line-height: 1.6;
+        }
+
+        .email-sent-info .email-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
         @media (max-width: 768px) {
             .auth-card {
                 padding: 2rem;
@@ -247,10 +295,8 @@
             }
         }
     </style>
-
 </head>
 <body>
-    <!-- Floating shapes -->
     <div class="shape"></div>
     <div class="shape"></div>
     <div class="shape"></div>
@@ -267,6 +313,7 @@
 
             <div id="message" class="message"></div>
 
+            <!-- Форма регистрации -->
             <form id="registerForm" onsubmit="handleRegister(event)">
                 <div class="form-group">
                     <label for="username" class="form-label">Имя пользователя</label>
@@ -298,17 +345,35 @@
                            class="form-input" placeholder="Повторите пароль" required>
                 </div>
 
-                <button type="submit" class="submit-button">Зарегистрироваться</button>
+                <button type="submit" class="submit-button" id="registerButton">Зарегистрироваться</button>
             </form>
 
-            <div class="form-footer">
+            <!-- Сообщение об отправке письма -->
+            <div id="emailSentSection" class="hidden">
+                <div class="email-sent-info">
+                    <div class="email-icon">📧</div>
+                    <p style="margin-bottom: 0.5rem;">Письмо для подтверждения отправлено на:</p>
+                    <p style="font-weight: 600;" id="registeredEmail"></p>
+                    <p style="margin-top: 1rem; font-size: 0.9rem;">Проверьте вашу почту и следуйте инструкциям.</p>
+                </div>
+
+                <button onclick="resendEmail()" class="resend-button" id="resendButton">
+                    Отправить письмо повторно
+                </button>
+                <p style="text-align: center; color: #cbd5e1; font-size: 0.85rem; margin-top: 0.5rem;" id="timerText"></p>
+            </div>
+
+            <div class="form-footer" id="loginLink">
                 Уже есть аккаунт? <a href="/auth/login">Войти</a>
             </div>
         </div>
     </div>
 
-
     <script>
+        let userEmail = '';
+        let resendTimer = null;
+        let resendSeconds = 0;
+
         function showError(message) {
             const messageEl = document.getElementById('message');
             messageEl.textContent = message;
@@ -325,43 +390,124 @@
             messageEl.className = 'message success';
             messageEl.style.display = 'block';
         }
-    </script>
 
-    <script>
+        function showInfo(message) {
+            const messageEl = document.getElementById('message');
+            messageEl.textContent = message;
+            messageEl.className = 'message info';
+            messageEl.style.display = 'block';
+        }
+
+        function startResendTimer() {
+            resendSeconds = 60;
+            const resendButton = document.getElementById('resendButton');
+            const timerText = document.getElementById('timerText');
+
+            resendButton.disabled = true;
+
+            resendTimer = setInterval(() => {
+                resendSeconds--;
+                timerText.textContent = `Повторная отправка доступна через ${resendSeconds} сек.`;
+
+                if (resendSeconds <= 0) {
+                    clearInterval(resendTimer);
+                    resendButton.disabled = false;
+                    timerText.textContent = '';
+                }
+            }, 1000);
+        }
+
+        function showEmailSentScreen(email) {
+            userEmail = email;
+
+            // Скрываем форму
+            document.getElementById('registerForm').classList.add('hidden');
+            document.getElementById('loginLink').classList.add('hidden');
+            document.getElementById('message').style.display = 'none';
+
+            // Показываем секцию с информацией об отправке
+            document.getElementById('emailSentSection').classList.remove('hidden');
+            document.getElementById('registeredEmail').textContent = email;
+
+            // Запускаем таймер
+            startResendTimer();
+        }
+
         async function handleRegister(event) {
             event.preventDefault();
 
-            const formData = {
-                username: document.getElementById('username').value,
-                email: document.getElementById('email').value,
-                full_name: document.getElementById('full_name').value,
-                password: document.getElementById('password').value
-            };
+            const registerButton = document.getElementById('registerButton');
+            registerButton.disabled = true;
+            registerButton.textContent = 'Регистрация...';
+
+            const formData = new URLSearchParams();
+            formData.append('username', document.getElementById('username').value);
+            formData.append('email', document.getElementById('email').value);
+            formData.append('full_name', document.getElementById('full_name').value);
+            formData.append('password', document.getElementById('password').value);
 
             // Validate password confirmation
             const confirmPassword = document.getElementById('confirm_password').value;
-            if (formData.password !== confirmPassword) {
+            if (formData.get('password') !== confirmPassword) {
                 showError('Пароли не совпадают');
+                registerButton.disabled = false;
+                registerButton.textContent = 'Зарегистрироваться';
                 return;
             }
 
             try {
                 const response = await fetch('/auth/register', {
                     method: 'POST',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    body: formData,
+                    credentials: 'include'
+                });
+
+                const data = await response.text();
+
+                if (response.ok) {
+                    // Показываем экран с информацией об отправке письма
+                    showEmailSentScreen(formData.get('email'));
+                } else {
+                    showError(data || 'Ошибка регистрации');
+                    registerButton.disabled = false;
+                    registerButton.textContent = 'Зарегистрироваться';
+                }
+            } catch (error) {
+                showError('Ошибка сети. Попробуйте снова.');
+                registerButton.disabled = false;
+                registerButton.textContent = 'Зарегистрироваться';
+            }
+        }
+
+        async function resendEmail() {
+            const resendButton = document.getElementById('resendButton');
+            resendButton.disabled = true;
+            resendButton.textContent = 'Отправка...';
+
+            try {
+                const response = await fetch('/auth/resend-verification', {
+                    method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({ email: userEmail }),
+                    credentials: 'include'
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    showSuccess('Регистрация успешна! Проверьте email для подтверждения аккаунта.');
-                    setTimeout(() => window.location.href = '/auth/login', 2000);
+                    showSuccess('Письмо отправлено повторно!');
+                    resendButton.textContent = 'Отправить письмо повторно';
+                    startResendTimer();
                 } else {
-                    showError(data.detail || 'Ошибка регистрации');
+                    showError(data.detail || 'Ошибка отправки письма');
+                    resendButton.disabled = false;
+                    resendButton.textContent = 'Отправить письмо повторно';
                 }
             } catch (error) {
                 showError('Ошибка сети. Попробуйте снова.');
+                resendButton.disabled = false;
+                resendButton.textContent = 'Отправить письмо повторно';
             }
         }
     </script>
