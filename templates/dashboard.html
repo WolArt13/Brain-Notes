@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Brain Notes</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            background: linear-gradient(135deg, #0f0f1e, #1a1a2e, #16213e);
+            color: #ffffff;
+            min-height: 100vh;
+        }
+
+        /* Navbar */
+        .navbar {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .navbar-user {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            color: #ffffff;
+        }
+
+        .user-email {
+            font-size: 0.85rem;
+            color: #cbd5e1;
+        }
+
+        .logout-button {
+            padding: 0.5rem 1.5rem;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.5);
+            border-radius: 8px;
+            color: #fca5a5;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-button:hover {
+            background: rgba(239, 68, 68, 0.3);
+            transform: translateY(-2px);
+        }
+
+        /* Main content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+        }
+
+        .welcome-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            text-align: center;
+        }
+
+        .welcome-title {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .welcome-text {
+            color: #cbd5e1;
+            font-size: 1.1rem;
+        }
+
+        .notes-section {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 2rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #ffffff;
+        }
+
+        .notes-placeholder {
+            text-align: center;
+            padding: 3rem;
+            color: #cbd5e1;
+        }
+
+        .notes-placeholder p {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+        }
+
+        .create-note-button {
+            padding: 1rem 2rem;
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: #ffffff;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 1rem;
+        }
+
+        .create-note-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 217, 255, 0.4);
+        }
+
+        /* Loading state */
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #cbd5e1;
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.1);
+            border-top: 3px solid #00d9ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="navbar-brand">Brain Notes</div>
+        <div class="navbar-user">
+            <div class="user-info">
+                <div class="user-name" id="userName">Загрузка...</div>
+                <div class="user-email" id="userEmail"></div>
+            </div>
+            <button class="logout-button" onclick="handleLogout()">Выйти</button>
+        </div>
+    </nav>
+
+    <!-- Main content -->
+    <div class="container">
+        <div id="loadingState" class="loading">
+            <div class="spinner"></div>
+            <p>Загрузка...</p>
+        </div>
+
+        <div id="mainContent" style="display: none;">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Добро пожаловать в Brain Notes!</h1>
+                <p class="welcome-text">Начните организовывать свои мысли в дереве связанных идей</p>
+            </div>
+
+            <div class="notes-section">
+                <h2 class="section-title">Ваши заметки</h2>
+                <div class="notes-placeholder">
+                    <p>📝 У вас пока нет заметок</p>
+                    <p style="font-size: 0.9rem; color: #94a3b8;">Создайте первую заметку, чтобы начать работу</p>
+                    <button class="create-note-button" onclick="createNote()">Создать заметку</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tokenRefreshInterval = null;
+
+        // Проверка авторизации при загрузке страницы
+        async function checkAuth() {
+            try {
+                const response = await fetch('/auth/me', {
+                    method: 'GET',
+                    credentials: 'include' // Важно для отправки cookies
+                });
+
+                if (response.status === 401) {
+                    // Access token истёк, пробуем обновить
+                    const refreshed = await refreshAccessToken();
+                    if (!refreshed) {
+                        // Не удалось обновить - редирект на login
+                        window.location.href = '/login';
+                        return null;
+                    }
+                    // Повторяем запрос после обновления токена
+                    return await checkAuth();
+                }
+
+                if (!response.ok) {
+                    throw new Error('Authentication failed');
+                }
+
+                const user = await response.json();
+                return user;
+
+            } catch (error) {
+                console.error('Auth check failed:', error);
+                window.location.href = '/login';
+                return null;
+            }
+        }
+
+        // Обновление access_token с помощью refresh_token
+        async function refreshAccessToken() {
+            try {
+                const response = await fetch('/auth/refresh', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    console.log('Access token refreshed successfully');
+                    return true;
+                } else {
+                    console.error('Failed to refresh token');
+                    return false;
+                }
+            } catch (error) {
+                console.error('Token refresh error:', error);
+                return false;
+            }
+        }
+
+        // Автоматическое обновление токена каждые 25 минут (перед истечением 30 минут)
+        function startTokenRefreshTimer() {
+            // Обновляем токен каждые 25 минут
+            tokenRefreshInterval = setInterval(async () => {
+                console.log('Auto-refreshing access token...');
+                await refreshAccessToken();
+            }, 25 * 60 * 1000); // 25 минут
+        }
+
+        // Выход из системы
+        async function handleLogout() {
+            try {
+                const response = await fetch('/auth/logout', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    // Останавливаем таймер обновления токена
+                    if (tokenRefreshInterval) {
+                        clearInterval(tokenRefreshInterval);
+                    }
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout failed:', error);
+            }
+        }
+
+        // Инициализация страницы
+        async function initDashboard() {
+            const user = await checkAuth();
+
+            if (user) {
+                // Отображаем информацию о пользователе
+                document.getElementById('userName').textContent = user.full_name || user.username;
+                document.getElementById('userEmail').textContent = user.email;
+
+                // Скрываем загрузку, показываем контент
+                document.getElementById('loadingState').style.display = 'none';
+                document.getElementById('mainContent').style.display = 'block';
+
+                // Запускаем автоматическое обновление токена
+                startTokenRefreshTimer();
+            }
+        }
+
+        // Заглушка для создания заметки
+        function createNote() {
+            alert('Функция создания заметок будет реализована в следующих версиях!');
+        }
+
+        // Запускаем при загрузке страницы
+        document.addEventListener('DOMContentLoaded', initDashboard);
+
+        // Очищаем таймер при закрытии страницы
+        window.addEventListener('beforeunload', () => {
+            if (tokenRefreshInterval) {
+                clearInterval(tokenRefreshInterval);
+            }
+        });
+    </script>
+</body>
+</html>

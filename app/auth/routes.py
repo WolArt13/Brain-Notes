@@ -23,7 +23,7 @@ templates = Jinja2Templates(directory="templates")
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 @router.get("/register")
-async def login(request: Request):
+async def register_get(request: Request):
     return templates.TemplateResponse("register.html", {"request": request})
 
 @router.post("/register")
@@ -230,7 +230,6 @@ async def login(
         data={"sub": user.username}
     )
 
-    # ✅ ВАЖНО: Устанавливаем HTTP-only cookies
     response.set_cookie(
         key="access_token",
         value=access_token,
