@@ -10,15 +10,15 @@ from datetime import timedelta
 
 from app.database import get_db
 from app.config import settings
-from app.models.validators import ResendVerificationRequest, ResetPasswordRequest, UserCreate, UserResponse, Token
+from app.models.validators import ResendVerificationRequest
 from app.models.database import User
 from app.auth.jwt_handler import create_access_token, create_refresh_token, decode_jwt
 from app.auth.email_utils import verify_email_token, generate_password_reset_token, verify_password_reset_token
-from app.auth.email_service import send_password_reset_email, send_verification_email
+from app.auth.email_service import send_password_reset_email, send_verification_email, send_welcome_email
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory="templates/auth")
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -58,7 +58,7 @@ async def register(
 
     db.add(new_user)
     await db.commit()
-    db.refresh(new_user)
+    await db.refresh(new_user)
 
     background_tasks.add_task(
         send_verification_email,
@@ -75,6 +75,7 @@ async def register(
 async def verify_email(
     token: str,
     request: Request,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db)
 ):
     """
@@ -105,6 +106,12 @@ async def verify_email(
     # Подтверждаем email
     user.is_verified = True
     await db.commit()
+
+    background_tasks.add_task(
+        send_welcome_email,
+        email=user.email,
+        username=user.username
+    )
 
     return templates.TemplateResponse("register_success.html", {"request": request})
 
@@ -331,8 +338,9 @@ async def forgot_password(
 async def reset_password_form(request: Request, token: str):
     try: 
         verify_password_reset_token(token)
-        return templates.TemplateResponse("reset_password.html", {"request": request, "token": token})
+        return templates.TemplateResponse("reset-password.html", {"request": request, "token": token})
     except Exception as e:
+        print(str(e))
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail=str(e)

@@ -317,14 +317,14 @@
                     credentials: 'include'  // ✅ Включаем отправку/получение cookies
                 });
 
-                const data = await response.json();
+                const data = await response.text();
 
                 if (response.ok) {
                     showSuccess('Вход выполнен успешно!');
                     // Куки уже установлены автоматически сервером!
                     setTimeout(() => window.location.href = '/dashboard', 1500);
                 } else {
-                    showError(data.detail || 'Ошибка входа');
+                    showError(data || 'Ошибка входа');
                 }
             } catch (error) {
                 showError('Ошибка сети. Попробуйте снова.');

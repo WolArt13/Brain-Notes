@@ -1,6 +1,7 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr
 from app.config import settings
+from app.auth.email_templates import get_verification_email_html, get_password_reset_email_html, get_welcome_email_html
 from app.auth.email_utils import generate_verification_token
 
 mail_config = ConnectionConfig(
@@ -18,70 +19,79 @@ mail_config = ConnectionConfig(
 fastmail = FastMail(mail_config)
 
 async def send_verification_email(email: EmailStr, username: str) -> None:
+    """
+    Отправка письма для подтверждения email при регистрации.
+    """
+    # Генерируем токен верификации
     token = generate_verification_token(email)
-
     verification_link = f"{settings.APP_URL}/auth/verify?token={token}"
 
-    html_content = f"""
-    <!DOCTYPE html>
-    <html>
-    <head>
-        <style>
-            body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
-            .container {{ max-width: 600px; margin: 0 auto; padding: 20px; 
-                         border: 1px solid #ddd; border-radius: 5px; }}
-            .button {{ display: inline-block; padding: 12px 24px; 
-                      background-color: #007bff; color: white; 
-                      text-decoration: none; border-radius: 4px; margin: 20px 0; }}
-            .footer {{ margin-top: 30px; font-size: 12px; color: #666; }}
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <h2>Подтвердите ваш email</h2>
-            <p>Здравствуйте, {username}!</p>
-            <p>Спасибо за регистрацию в сервисе BrainNotes. Пожалуйста, подтвердите ваш email:</p>
-            <a href="{verification_link}" class="button">Подтвердить Email</a>
-            <p>Или скопируйте ссылку: <a href="{verification_link}">{verification_link}</a></p>
-            <div class="footer">
-                <p>Ссылка действительна {settings.VERIFICATION_TOKEN_EXPIRE_HOURS} часов.</p>
-                <p>Если вы не регистрировались, проигнорируйте это письмо.</p>
-            </div>
-        </div>
-    </body>
-    </html>
-    """
+    # Получаем стилизованный HTML шаблон
+    html_content = get_verification_email_html(username, verification_link)
 
+    # Создаём сообщение
     message = MessageSchema(
-        subject="Подтвердите ваш email",
+        subject="Подтверждение регистрации - Brain Notes",
         recipients=[email],
         body=html_content,
         subtype="html"
     )
 
+    # Отправляем письмо
     await fastmail.send_message(message)
 
-async def send_password_reset_email(email: EmailStr, reset_token: str) -> None:
+
+async def send_password_reset_email(email: EmailStr, reset_token: str, username: str = None) -> None:
+    """
+    Отправка письма для сброса пароля.
+    """
+    # Формируем ссылку для сброса пароля
     reset_link = f"{settings.APP_URL}/auth/reset-password?token={reset_token}"
 
-    html_content = f"""
-    <div style="font-family: Arial;">
-        <h2>Сброс пароля</h2>
-        <p>Вы запросили сброс пароля в сервисе BrainNotes. Нажмите на кнопку:</p>
-        <a href="{reset_link}" style="padding: 10px 20px; background: #007bff; 
-           color: white; text-decoration: none; border-radius: 4px;">
-            Сбросить пароль
-        </a>
-        <p>Ссылка действительна {settings.VERIFICATION_TOKEN_EXPIRE_HOURS} часов.</p>
-        <p>Если вы не запрашивали сброс, проигнорируйте это письмо.</p>
-    </div>
-    """
+    # Если username не передан, используем часть email
+    if not username:
+        username = email.split('@')[0]
 
+    # Время истечения токена (по умолчанию 24 часа)
+    expire_hours = getattr(settings, 'PASSWORD_RESET_TOKEN_EXPIRE_HOURS', 24)
+
+    # Получаем стилизованный HTML шаблон
+    html_content = get_password_reset_email_html(
+        username=username,
+        reset_link=reset_link,
+        expire_hours=expire_hours
+    )
+
+    # Создаём сообщение
     message = MessageSchema(
-        subject="Сброс пароля",
+        subject="Сброс пароля - Brain Notes",
         recipients=[email],
         body=html_content,
         subtype="html"
     )
-    
+
+    # Отправляем письмо
+    await fastmail.send_message(message)
+
+
+async def send_welcome_email(email: EmailStr, username: str) -> None:
+    """
+    Опциональное приветственное письмо после успешной верификации email.
+    Вызывайте эту функцию после подтверждения email пользователем.
+    """
+    # URL для кнопки "Начать работу"
+    dashboard_url = f"{settings.APP_URL}/dashboard"
+
+    # Получаем стилизованный HTML шаблон
+    html_content = get_welcome_email_html(username, dashboard_url)
+
+    # Создаём сообщение
+    message = MessageSchema(
+        subject="Добро пожаловать в Brain Notes! 🎉",
+        recipients=[email],
+        body=html_content,
+        subtype="html"
+    )
+
+    # Отправляем письмо
     await fastmail.send_message(message)
