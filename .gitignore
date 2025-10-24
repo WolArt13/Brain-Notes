@@ -1,0 +1,6 @@
+BrainNotes.zip
+.env
+/alembic/versions
+**cache**
+venv
+alembic.ini

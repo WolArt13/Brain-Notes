@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brain Notes - Организуйте свои мысли</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        :root {
+            /* Premium Color Palette */
+            --bg-primary: #0f0f1e;
+            --bg-secondary: #1a1a2e;
+            --bg-tertiary: #16213e;
+            --accent-teal: #00d9ff;
+            --accent-cyan: #06b6d4;
+            --accent-purple: #8b5cf6;
+            --accent-indigo: #6366f1;
+            --text-primary: #ffffff;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --glass-bg: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-hover: rgba(255, 255, 255, 0.08);
+            
+            /* Typography */
+            --font-family: 'Inter', 'SF Pro Display', -apple-system, system-ui, sans-serif;
+            --font-size-xs: 0.75rem;
+            --font-size-sm: 0.875rem;
+            --font-size-base: 1rem;
+            --font-size-lg: 1.125rem;
+            --font-size-xl: 1.25rem;
+            --font-size-2xl: 1.5rem;
+            --font-size-3xl: 1.875rem;
+            --font-size-4xl: 2.25rem;
+            --font-size-5xl: 3rem;
+            --font-size-6xl: 3.75rem;
+            
+            /* Spacing */
+            --spacing-xs: 0.5rem;
+            --spacing-sm: 0.75rem;
+            --spacing-md: 1rem;
+            --spacing-lg: 1.5rem;
+            --spacing-xl: 2rem;
+            --spacing-2xl: 3rem;
+            --spacing-3xl: 4rem;
+            --spacing-4xl: 5rem;
+            
+            /* Shadows */
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --shadow-glow: 0 0 20px rgba(0, 217, 255, 0.15);
+            
+            /* Border Radius */
+            --radius-sm: 0.375rem;
+            --radius-md: 0.5rem;
+            --radius-lg: 0.75rem;
+            --radius-xl: 1rem;
+            --radius-2xl: 1.5rem;
+            
+            /* Animation */
+            --duration-fast: 150ms;
+            --duration-normal: 300ms;
+            --duration-slow: 500ms;
+            --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+            --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+
+
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: var(--font-family);
+            line-height: 1.6;
+            color: var(--text-primary);
+            background: var(--bg-primary);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Hero Section */
+        .hero {
+            position: relative;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        
+        .gradient-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+        
+        .gradient-1 {
+            background: linear-gradient(135deg, #0f0f1e, #1a1a2e, #16213e);
+            animation: fadeInOut1 15s ease-in-out infinite;
+        }
+        
+        .gradient-2 {
+            background: linear-gradient(160deg, #16213e, #1a1a2e, #1e2745);
+            animation: fadeInOut2 15s ease-in-out infinite;
+        }
+        
+        .gradient-3 {
+            background: linear-gradient(110deg, #1e2745, #16213e, #1a1a2e);
+            animation: fadeInOut3 15s ease-in-out infinite;
+        }
+        
+        @keyframes fadeInOut1 {
+            0%, 100% { opacity: 1; }
+            33%, 66% { opacity: 0; }
+        }
+        
+        @keyframes fadeInOut2 {
+            0%, 66%, 100% { opacity: 0; }
+            33% { opacity: 1; }
+        }
+        
+        @keyframes fadeInOut3 {
+            0%, 33%, 100% { opacity: 0; }
+            66% { opacity: 1; }
+        }
+        
+        .floating-shapes {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        .shape {
+            position: absolute;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple));
+            border-radius: var(--radius-2xl);
+            opacity: 0.1;
+            animation: floatShape 15s infinite ease-in-out;
+        }
+        
+        .shape:nth-child(1) {
+            width: 120px;
+            height: 120px;
+            top: 20%;
+            left: 10%;
+            animation-delay: 0s;
+        }
+        
+        .shape:nth-child(2) {
+            width: 80px;
+            height: 80px;
+            top: 60%;
+            right: 15%;
+            animation-delay: -5s;
+            border-radius: 50%;
+        }
+        
+        .shape:nth-child(3) {
+            width: 60px;
+            height: 60px;
+            bottom: 30%;
+            left: 20%;
+            animation-delay: -10s;
+        }
+        
+        .shape:nth-child(4) {
+            width: 100px;
+            height: 100px;
+            top: 10%;
+            right: 30%;
+            animation-delay: -7s;
+            border-radius: 50%;
+        }
+        
+        @keyframes floatShape {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            50% {
+                transform: translateY(-30px) rotate(180deg);
+            }
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 800px;
+            padding: var(--spacing-xl);
+            opacity: 0;
+            transform: scale(0.95);
+            animation: heroEnter 1.2s var(--ease-out) 0.3s forwards;
+        }
+        
+        @keyframes heroEnter {
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        .hero-title {
+            font-size: clamp(var(--font-size-4xl), 8vw, var(--font-size-6xl));
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: var(--spacing-lg);
+            line-height: 1.1;
+            animation: breathe 4s ease-in-out infinite, titleFadeIn 1s var(--ease-out) 0.6s both;
+        }
+        
+        @keyframes breathe {
+            0%, 100% {
+                transform: scale(1);
+            }
+            50% {
+                transform: scale(1.02);
+            }
+        }
+        
+        @keyframes titleFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-subtitle {
+            font-size: var(--font-size-xl);
+            color: var(--text-secondary);
+            font-weight: 500;
+            margin-bottom: var(--spacing-3xl);
+            opacity: 0;
+            animation: subtitleFadeIn 1s var(--ease-out) 0.9s both;
+        }
+        
+        @keyframes subtitleFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .cta-buttons {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1.5rem;
+            opacity: 0;
+            animation: buttonsFadeIn 1s var(--ease-out) 1.2s both;
+        }
+        
+        @keyframes buttonsFadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .primary-button {
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple));
+            border: none;
+            border-radius: var(--radius-xl);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-normal) var(--ease-out);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            cursor: pointer;
+        }
+        
+        .primary-button:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-xl), 0 0 30px rgba(0, 217, 255, 0.3);
+        }
+        
+        .secondary-text {
+            color: var(--text-muted);
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+        }
+        
+        .secondary-text a {
+            color: var(--accent-cyan);
+            text-decoration: none;
+            transition: color var(--duration-fast) var(--ease-out);
+        }
+        
+        .secondary-text a:hover {
+            color: var(--accent-teal);
+        }
+        
+        .btn-primary {
+            padding: var(--spacing-lg) var(--spacing-2xl);
+            font-size: var(--font-size-lg);
+            font-weight: 600;
+            color: var(--text-primary);
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-purple));
+            border: none;
+            border-radius: var(--radius-xl);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--duration-normal) var(--ease-out);
+            box-shadow: var(--shadow-lg), var(--shadow-glow);
+            cursor: pointer;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: var(--shadow-xl), 0 0 30px rgba(0, 217, 255, 0.3);
+        }
+        
+        .btn-secondary {
+            color: var(--accent-cyan);
+            font-size: var(--font-size-base);
+            font-weight: 500;
+            text-decoration: none;
+            transition: color var(--duration-fast) var(--ease-out);
+        }
+        
+        .btn-secondary:hover {
+            color: var(--accent-teal);
+        }
+        
+        .secondary-link {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-xs);
+            color: var(--text-muted);
+        }
+
+        /* Features Section */
+        .features {
+            padding: var(--spacing-4xl) var(--spacing-xl);
+            background: linear-gradient(180deg, var(--bg-primary) 0%, rgba(15, 15, 30, 0.95) 100%);
+            position: relative;
+        }
+        
+        .features::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(ellipse at center, rgba(0, 217, 255, 0.02) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .features-heading {
+            text-align: center;
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-4xl);
+            opacity: 0;
+            transform: translateY(30px);
+        }
+
+        .features-heading.visible {
+            animation: fadeInUp 0.8s var(--ease-out) forwards;
+        }
+        
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .features-grid {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-2xl);
+        }
+
+        .feature-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius-2xl);
+            padding: var(--spacing-2xl);
+            text-align: center;
+            transition: all var(--duration-normal) var(--ease-out);
+            opacity: 0;
+            transform: translateY(40px);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-teal), transparent);
+            opacity: 0;
+            transition: opacity var(--duration-normal) var(--ease-out);
+        }
+
+        .feature-card.visible {
+            animation: cardFadeIn 0.8s var(--ease-out) forwards;
+        }
+        
+        .feature-card:nth-child(1) { animation-delay: 0.1s; }
+        .feature-card:nth-child(2) { animation-delay: 0.25s; }
+        .feature-card:nth-child(3) { animation-delay: 0.4s; }
+        .feature-card:nth-child(4) { animation-delay: 0.55s; }
+        .feature-card:nth-child(5) { animation-delay: 0.7s; }
+        .feature-card:nth-child(6) { animation-delay: 0.85s; }
+        
+        @keyframes cardFadeIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            background: var(--glass-hover);
+            border-color: rgba(139, 92, 246, 0.3);
+            box-shadow: var(--shadow-xl), 0 0 40px rgba(139, 92, 246, 0.1);
+        }
+        
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: var(--spacing-lg);
+            display: block;
+            filter: grayscale(0.3) brightness(1.1);
+        }
+
+        .feature-title {
+            font-size: var(--font-size-xl);
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: var(--spacing-md);
+        }
+
+        .feature-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: var(--font-size-base);
+        }
+
+
+
+
+
+        /* Footer */
+        .footer {
+            padding: var(--spacing-2xl) var(--spacing-xl);
+            text-align: center;
+            background: var(--bg-primary);
+            border-top: 1px solid var(--glass-border);
+        }
+        
+        .footer-text {
+            color: var(--text-muted);
+            font-size: var(--font-size-sm);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .footer-links {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-lg);
+        }
+        
+        .footer-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-size: var(--font-size-sm);
+            transition: color var(--duration-fast) var(--ease-out);
+        }
+        
+        .footer-links a:hover {
+            color: var(--accent-teal);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .cta-buttons {
+                gap: 1.25rem;
+            }
+            
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: var(--spacing-xl);
+            }
+            
+            .hero {
+                padding: var(--spacing-xl);
+            }
+        }
+
+        @media (max-width: 480px) {
+            .hero-content {
+                padding: var(--spacing-lg);
+            }
+            
+            .features {
+                padding: var(--spacing-3xl) var(--spacing-md);
+            }
+            
+            .feature-card {
+                padding: var(--spacing-xl);
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="gradient-layer gradient-1"></div>
+        <div class="gradient-layer gradient-2"></div>
+        <div class="gradient-layer gradient-3"></div>
+        <div class="floating-shapes">
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+            <div class="shape"></div>
+        </div>
+        <div class="hero-content">
+            <h1 class="hero-title">Brain Notes</h1>
+            <p class="hero-subtitle">Организуйте свои мысли в дереве связанных идей</p>
+            <div class="cta-buttons">
+                <a href="/auth/register" class="primary-button">Начать работу</a>
+                <div class="secondary-text">
+                    <span>Уже есть аккаунт?</span>
+                    <a href="/auth/login" onclick="">Войти</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2 class="features-heading" id="featuresHeading">Возможности для вашего разума</h2>
+        
+        <div class="features-grid">
+            <div class="feature-card" id="feature-1">
+                <span class="feature-icon">🌳</span>
+                <h3 class="feature-title">Древовидная структура</h3>
+                <p class="feature-description">Организуйте идеи в интуитивную иерархию. Каждая заметка может содержать подзаметки, формируя естественную структуру знаний.</p>
+            </div>
+            
+            <div class="feature-card" id="feature-2">
+                <span class="feature-icon">🔗</span>
+                <h3 class="feature-title">Умные связи</h3>
+                <p class="feature-description">Соединяйте мысли между собой. Создавайте сеть знаний, где каждая идея связана с другими релевантными заметками.</p>
+            </div>
+            
+            <div class="feature-card" id="feature-3">
+                <span class="feature-icon">🔍</span>
+                <h3 class="feature-title">Мгновенный поиск</h3>
+                <p class="feature-description">Находите любую заметку за секунды. Мощный поиск и интеллектуальные фильтры делают навигацию простой.</p>
+            </div>
+            
+            <div class="feature-card" id="feature-4">
+                <span class="feature-icon">📊</span>
+                <h3 class="feature-title">Визуализация</h3>
+                <p class="feature-description">Смотрите на свои мысли как на граф. Визуализируйте связи и структуру вашей базы знаний.</p>
+            </div>
+            
+            <div class="feature-card" id="feature-5">
+                <span class="feature-icon">⚡</span>
+                <h3 class="feature-title">Быстрые заметки</h3>
+                <p class="feature-description">Создавайте заметки мгновенно. Простой интерфейс позволяет записывать мысли без лишних кликов и отвлечений.</p>
+            </div>
+            
+            <div class="feature-card" id="feature-6">
+                <span class="feature-icon">💾</span>
+                <h3 class="feature-title">Экспорт и бэкап</h3>
+                <p class="feature-description">Сохраняйте копии ваших заметок. Экспортируйте данные в различных форматах для резервного копирования и архивирования.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-text">© 2025 Brain Notes</div>
+        <div class="footer-links">
+            <a href="#">Конфиденциальность</a>
+            <a href="#">Условия использования</a>
+        </div>
+    </footer>
+
+    <script>
+        // Intersection Observer for scroll animations
+        class ScrollAnimations {
+            constructor() {
+                this.observer = new IntersectionObserver(
+                    (entries) => {
+                        entries.forEach(entry => {
+                            if (entry.isIntersecting) {
+                                entry.target.classList.add('visible');
+                            }
+                        });
+                    },
+                    {
+                        threshold: 0.1,
+                        rootMargin: '50px'
+                    }
+                );
+                
+                this.init();
+            }
+            
+            init() {
+                // Observe elements that need animation
+                const elementsToAnimate = [
+                    document.getElementById('featuresHeading'),
+                    ...document.querySelectorAll('.feature-card')
+                ];
+                
+                elementsToAnimate.forEach(el => {
+                    if (el) {
+                        this.observer.observe(el);
+                    }
+                });
+            }
+        }
+        
+        // Performance optimized animations
+        class AnimationController {
+            constructor() {
+                this.raf = null;
+                this.isScrolling = false;
+                this.setupScrollListener();
+                this.setupParallax();
+            }
+            
+            setupScrollListener() {
+                let ticking = false;
+                
+                const handleScroll = () => {
+                    if (!ticking) {
+                        requestAnimationFrame(() => {
+                            this.updateParallax();
+                            ticking = false;
+                        });
+                        ticking = true;
+                    }
+                };
+                
+                window.addEventListener('scroll', handleScroll, { passive: true });
+            }
+            
+            setupParallax() {
+                this.shapes = document.querySelectorAll('.shape');
+            }
+            
+            updateParallax() {
+                const scrolled = window.pageYOffset;
+                const rate = scrolled * -0.5;
+                
+                this.shapes.forEach((shape, index) => {
+                    const speed = 0.3 + (index * 0.1);
+                    shape.style.transform = `translateY(${rate * speed}px) rotate(${scrolled * 0.05}deg)`;
+                });
+            }
+        }
+        
+        // Enhanced button interactions
+        class ButtonEffects {
+            constructor() {
+                this.setupRippleEffect();
+            }
+            
+            setupRippleEffect() {
+                const buttons = document.querySelectorAll('.btn-primary');
+                
+                buttons.forEach(button => {
+                    button.addEventListener('click', (e) => {
+                        this.createRipple(e, button);
+                    });
+                });
+            }
+            
+            createRipple(event, button) {
+                const rect = button.getBoundingClientRect();
+                const size = Math.max(rect.width, rect.height);
+                const x = event.clientX - rect.left - size / 2;
+                const y = event.clientY - rect.top - size / 2;
+                
+                const ripple = document.createElement('span');
+                ripple.style.cssText = `
+                    position: absolute;
+                    width: ${size}px;
+                    height: ${size}px;
+                    left: ${x}px;
+                    top: ${y}px;
+                    background: rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    transform: scale(0);
+                    animation: rippleEffect 0.6s linear;
+                    pointer-events: none;
+                `;
+                
+                button.appendChild(ripple);
+                
+                setTimeout(() => {
+                    ripple.remove();
+                }, 600);
+            }
+        }
+        
+        // Smooth scroll for internal links
+        class SmoothScroll {
+            constructor() {
+                this.setupSmoothScroll();
+            }
+            
+            setupSmoothScroll() {
+                document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                    anchor.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const target = document.querySelector(anchor.getAttribute('href'));
+                        if (target) {
+                            target.scrollIntoView({
+                                behavior: 'smooth',
+                                block: 'start'
+                            });
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Initialize everything when DOM is loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize all components
+            new ScrollAnimations();
+            new AnimationController();
+            new ButtonEffects();
+            new SmoothScroll();
+            
+            // Add dynamic keyframes for ripple effect
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes rippleEffect {
+                    to {
+                        transform: scale(4);
+                        opacity: 0;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+            
+            // Optimize images and lazy load if needed
+            if ('loading' in HTMLImageElement.prototype) {
+                document.querySelectorAll('img[loading="lazy"]').forEach(img => {
+                    img.style.opacity = '0';
+                    img.style.transition = 'opacity 0.3s';
+                    img.addEventListener('load', () => {
+                        img.style.opacity = '1';
+                    });
+                });
+            }
+        });
+        
+        // Handle window resize with debouncing
+        let resizeTimeout;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(() => {
+                // Trigger any resize-dependent calculations
+                window.dispatchEvent(new CustomEvent('optimizedResize'));
+            }, 250);
+        });
+        
+        // Preload critical resources for better performance
+        const preloadCriticalResources = () => {
+            // Preload fonts if not already loaded
+            if (!document.fonts.check('1em Inter')) {
+                const link = document.createElement('link');
+                link.rel = 'preload';
+                link.href = 'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap';
+                link.as = 'style';
+                link.onload = () => {
+                    link.rel = 'stylesheet';
+                };
+                document.head.appendChild(link);
+            }
+        };
+        
+        // Initialize preloading
+        preloadCriticalResources();
+    </script>
+</body>
+</html>
