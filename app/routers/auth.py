@@ -12,9 +12,9 @@ from app.database import get_db
 from app.config import settings
 from app.models.validators import ResendVerificationRequest
 from app.models.database import User
-from app.auth.jwt_handler import create_access_token, create_refresh_token, decode_jwt
-from app.auth.email_utils import verify_email_token, generate_password_reset_token, verify_password_reset_token
-from app.auth.email_service import send_password_reset_email, send_verification_email, send_welcome_email
+from app.defs.auth.jwt_handler import create_access_token, create_refresh_token, decode_jwt
+from app.defs.auth.email_utils import verify_email_token, generate_password_reset_token, verify_password_reset_token
+from app.defs.auth.service_defs import send_password_reset_email, send_verification_email, send_welcome_email
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 

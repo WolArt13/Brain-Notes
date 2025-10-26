@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     REFRESH_TOKEN_EXPIRE_DAYS: int = 7
 
     DATABASE_URL: str
+    DATABASE_URL_SYNC: str
 
     MAIL_USERNAME: str
     MAIL_PASSWORD: str
@@ -17,7 +18,7 @@ class Settings(BaseSettings):
     MAIL_TLS: bool = True
     MAIL_SSL: bool = False
 
-    APP_URL: str = "http://localhost:8000"
+    APP_URL: str = "http://192.168.0.28:8000"
     VERIFICATION_TOKEN_EXPIRE_HOURS: int = 24
 
     class Config:
