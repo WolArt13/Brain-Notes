@@ -1,17 +1,17 @@
-from typing import Annotated
-from fastapi import Depends, HTTPException, status
+from typing import Annotated, Optional
+from fastapi import Cookie, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from defs.auth.jwt_handler import decode_jwt
+from app.defs.auth.jwt_handler import decode_jwt
 from app.models.database import User
 from app.database import get_db
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 async def get_current_user(
-        token: Annotated[str, Depends(oauth2_scheme)],
+        access_token: Optional[str] = Cookie(None),
         db: AsyncSession = Depends(get_db)
 ) -> User:
     credentials_exception = HTTPException(
@@ -19,8 +19,7 @@ async def get_current_user(
         detail="Could not validate credentials",
         headers={"WWW-Authenticate": "Bearer"}
     )
-
-    payload = decode_jwt(token)
+    payload = decode_jwt(access_token)
     if payload is None:
         raise credentials_exception
     
@@ -34,8 +33,9 @@ async def get_current_user(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Pleace provide an access token, not a refresh token"
         )
-    
-    result = await db.execute(select(User).where(User.id == user_id))
+
+    # return user_id
+    result = await db.execute(select(User).where(User.id == int(user_id)))
     user = result.scalar_one_or_none()
 
     if user is None:

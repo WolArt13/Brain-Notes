@@ -42,9 +42,9 @@ async def root(request: Request, access_token: str = Cookie(None)):
     
     try:
         payload = decode_jwt(access_token)
-        username = payload.get("sub")
+        user_id = payload.get("sub")
 
-        if not username:
+        if not user_id:
             return templates.TemplateResponse("index.html", {"request": request})
     except Exception:
         return templates.TemplateResponse("index.html", {"request": request})

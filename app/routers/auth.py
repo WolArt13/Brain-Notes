@@ -134,9 +134,9 @@ async def get_current_user(
 
     try:
         payload = decode_jwt(access_token)
-        username = payload.get("sub")
+        user_id = int(payload.get("sub"))
 
-        if not username:
+        if not user_id:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Invalid token"
@@ -147,7 +147,7 @@ async def get_current_user(
             detail="Invalid token"
         )
 
-    result = await db.execute(select(User).where(User.username == username))
+    result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
 
     if not user:
@@ -230,11 +230,11 @@ async def login(
 
     # Создаем токены
     access_token = create_access_token(
-        data={"sub": user.id},
+        data={"sub": str(user.id)},
         expires_delta=timedelta(minutes=30)
     )
     refresh_token = create_refresh_token(
-        data={"sub": user.id}
+        data={"sub": str(user.id)}
     )
 
     response.set_cookie(
@@ -283,7 +283,7 @@ async def refresh_token(
 
     try:
         payload = decode_jwt(refresh_token_value)
-        user_id = payload.get("sub")
+        user_id = int(payload.get("sub"))
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -292,7 +292,7 @@ async def refresh_token(
 
     # Создаем новый access token
     new_access_token = create_access_token(
-        data={"sub": user_id},
+        data={"sub": str(user_id)},
         expires_delta=timedelta(minutes=30)
     )
 

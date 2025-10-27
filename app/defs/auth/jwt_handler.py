@@ -56,3 +56,6 @@ def decode_jwt(token: str) -> Optional[dict]:
         return payload
     except InvalidTokenError:
         return None
+    except Exception as e:
+        print(f"JWT decode error: {type(e).__name__} - {e}")
+        return None
