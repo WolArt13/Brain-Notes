@@ -77,7 +77,6 @@ async def send_password_reset_email(email: EmailStr, reset_token: str, username:
 async def send_welcome_email(email: EmailStr, username: str) -> None:
     """
     Опциональное приветственное письмо после успешной верификации email.
-    Вызывайте эту функцию после подтверждения email пользователем.
     """
     # URL для кнопки "Начать работу"
     dashboard_url = f"{settings.APP_URL}/dashboard"
