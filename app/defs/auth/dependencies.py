@@ -4,7 +4,7 @@ from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 
-from app.auth.jwt_handler import decode_jwt
+from defs.auth.jwt_handler import decode_jwt
 from app.models.database import User
 from app.database import get_db
 
@@ -24,8 +24,8 @@ async def get_current_user(
     if payload is None:
         raise credentials_exception
     
-    username: str = payload.get("sub")
-    if username is None:
+    user_id: str = payload.get("sub")
+    if user_id is None:
         raise credentials_exception
     
     token_type = payload.get("type")
@@ -35,7 +35,7 @@ async def get_current_user(
             detail="Pleace provide an access token, not a refresh token"
         )
     
-    result = await db.execute(select(User).where(User.username == username))
+    result = await db.execute(select(User).where(User.id == user_id))
     user = result.scalar_one_or_none()
 
     if user is None:

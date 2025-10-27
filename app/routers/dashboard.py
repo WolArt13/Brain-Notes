@@ -21,7 +21,6 @@ async def dashboard(
     Отображает страницу dashboard.
     Если токен отсутствует, перенаправляет на login.
     """
-    print(access_token)
     if not access_token:
         # Нет токена - редирект на login
         return RedirectResponse(url="/auth/login")
