@@ -230,11 +230,11 @@ async def login(
 
     # Создаем токены
     access_token = create_access_token(
-        data={"sub": user.username},
+        data={"sub": user.id},
         expires_delta=timedelta(minutes=30)
     )
     refresh_token = create_refresh_token(
-        data={"sub": user.username}
+        data={"sub": user.id}
     )
 
     response.set_cookie(
@@ -283,7 +283,7 @@ async def refresh_token(
 
     try:
         payload = decode_jwt(refresh_token_value)
-        username = payload.get("sub")
+        user_id = payload.get("sub")
     except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -292,7 +292,7 @@ async def refresh_token(
 
     # Создаем новый access token
     new_access_token = create_access_token(
-        data={"sub": username},
+        data={"sub": user_id},
         expires_delta=timedelta(minutes=30)
     )
 

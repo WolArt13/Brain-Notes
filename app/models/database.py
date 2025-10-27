@@ -33,7 +33,7 @@ class Note(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     title = Column(String(50))
-    content = Column(String, nullable=True)
+    content = Column(String, nullable=False)
 
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
 

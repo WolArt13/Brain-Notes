@@ -1,4 +1,5 @@
-from pydantic import BaseModel, EmailStr, Field
+from fastapi import HTTPException, status
+from pydantic import BaseModel, EmailStr, Field, ValidationError
 from typing import Optional
 from datetime import datetime
 
@@ -37,4 +38,22 @@ class ResetPasswordRequest(BaseModel):
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
 
-class NewNoteCreate()
+class NewNoteCreate(BaseModel):
+    header: Optional[str] = Field(None, max_length=50)
+    body: str
+
+async def validate_data(data, validation_class):
+    try:
+        validation_class(**data)
+    except ValidationError as e:
+        print(e.errors())
+        miss = [i['loc'][-1] for i in e.errors()]
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"ParameterError {miss}"
+        )
+    except TypeError as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"NotJSONFormat"
+        )
