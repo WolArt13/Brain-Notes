@@ -3,9 +3,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import status
-from app.auth import routers as auth_routes
+from app.routers.auth import router as auth_router
 from app.routers import dashboard
-from app.auth.jwt_handler import decode_jwt
+from app.defs.auth.jwt_handler import decode_jwt
 from app.config import settings
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
@@ -26,7 +26,7 @@ app.add_middleware(
 )
 templates = Jinja2Templates(directory="templates")
 
-app.include_router(auth_routes.router)
+app.include_router(auth_router)
 app.include_router(dashboard.router)
 
 @app.exception_handler(StarletteHTTPException)

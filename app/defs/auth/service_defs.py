@@ -1,8 +1,8 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr
 from app.config import settings
-from app.auth.email_templates import get_verification_email_html, get_password_reset_email_html, get_welcome_email_html
-from app.auth.email_utils import generate_verification_token
+from app.defs.auth.mail_templates_defs import get_verification_email_html, get_password_reset_email_html, get_welcome_email_html
+from app.defs.auth.email_utils import generate_verification_token
 
 mail_config = ConnectionConfig(
     MAIL_USERNAME=settings.MAIL_USERNAME,
