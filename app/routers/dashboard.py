@@ -1,6 +1,6 @@
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from fastapi import APIRouter, Cookie, Depends, HTTPException, Request, status
+from fastapi import APIRouter, Body, Cookie, Depends, HTTPException, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 
@@ -8,7 +8,7 @@ from app.defs.auth.jwt_handler import decode_jwt
 from app.database import get_db
 from app.defs.dashboard.defs import Dashboard
 from app.models.database import User
-from app.models.validators import NewNoteCreate, validate_data
+from app.models.validators import NewNoteCreate, NoteUpdate, validate_data
 from app.defs.auth.dependencies import get_current_active_user, get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -61,9 +61,19 @@ async def get_all_notes(request: Request, user: User = Depends(get_current_activ
 
     return user.notes
 
-# @router.get("/notes")
-# async def get_notes_page(request: Request, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
-#      return templates.TemplateResponse(
-#             ".html",
-#             {"request": request}
-#         )
+@router.patch("/note/{note_id}")
+async def update_note(request: Request, note_id, data = Body(), user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    dashboard = Dashboard(db)
+    await validate_data(data, NoteUpdate)
+
+    res = await dashboard.update_note(user, note_id, **data)
+
+    return res
+
+@router.delete("/note/{note_id}")
+async def update_note(request: Request, note_id, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    dashboard = Dashboard(db)
+    
+    res = await dashboard.delete_note(user, note_id)
+
+    return res

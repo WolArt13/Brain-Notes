@@ -42,6 +42,10 @@ class NewNoteCreate(BaseModel):
     header: Optional[str] = Field(None, max_length=50)
     body: str
 
+class NoteUpdate(BaseModel):
+    header: Optional[str] = Field(None, max_length=50)
+    body: Optional[str]
+
 async def validate_data(data, validation_class):
     try:
         validation_class(**data)
