@@ -1,3 +1,4 @@
+from sqlalchemy import exists, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from fastapi import APIRouter, BackgroundTasks, Body, Cookie, Depends, HTTPException, Request, status
@@ -32,9 +33,16 @@ async def update_profile(background_tasks: BackgroundTasks, request: Request, da
     email = data.get("email")
 
     if email:
+        email_already_in_use = (await db.execute(
+            select(exists().where(User.email == email))
+        )).scalar()
+
+        if email_already_in_use:
+            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Данный email уже используется")
+        
         background_tasks.add_task(
             send_change_mail_email,
-            email=user.email,
+            email=email,
             username=user.username
         )
 

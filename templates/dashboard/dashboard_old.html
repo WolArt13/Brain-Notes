@@ -45,14 +45,6 @@
 
         .user-details {
             text-align: right;
-            cursor: pointer;
-            padding: 8px 16px;
-            border-radius: 8px;
-            transition: all 0.2s;
-        }
-
-        .user-details:hover {
-            background: rgba(79, 172, 254, 0.1);
         }
 
         .user-name {
@@ -526,7 +518,7 @@
     <div class="header">
         <div class="logo">Brain Notes</div>
         <div class="user-info">
-            <div class="user-details" onclick="window.location.href='/profile'">
+            <div class="user-details">
                 <div class="user-name" id="userName">Загрузка...</div>
                 <div class="user-email" id="userEmail"></div>
             </div>
@@ -889,13 +881,24 @@
 
         function confirmDeleteNote() {
             const noteId = document.getElementById('editNoteId').value;
+            console.log('Attempting to delete note with ID:', noteId); // Для отладки
+            
             if (!noteId || noteId === 'null' || noteId === 'undefined') {
+                alert('Ошибка: не удалось определить ID заметки');
                 console.error('Note ID is missing or invalid:', noteId);
                 return;
             }
+            
+            // Сохраняем ID ПЕРЕД закрытием модального окна
             noteIdToDelete = noteId;
+            
+            // НЕ закрываем editModal здесь! Закроем после подтверждения
+            // closeEditModal(); // УБРАТЬ ЭТУ СТРОКУ
+            
+            // Открываем модальное окно подтверждения
             document.getElementById('confirmDeleteModal').classList.add('active');
         }
+
 
         function deleteNoteFromCard(noteId, event) {
             event.stopPropagation();
@@ -920,16 +923,18 @@
             }
 
             try {
-                const noteIdBackup = noteIdToDelete;
-                closeConfirmModal();
-                closeEditModal();
-                await deleteNote(noteIdBackup);
+                const noteIdBackup = noteIdToDelete; // Сохраняем копию
+                closeConfirmModal(); // Закрываем окно подтверждения
+                closeEditModal(); // Закрываем окно редактирования
+                
+                await deleteNote(noteIdBackup); // Используем сохраненную копию
             } catch (error) {
                 console.error('Error during delete:', error);
             } finally {
                 noteIdToDelete = null;
             }
         }
+
 
         async function deleteNote(noteId) {
             if (!noteId) {
@@ -962,14 +967,18 @@
 
         async function logout() {
             stopTokenRefresh();
-
+            
             try {
                 const response = await fetch('/auth/logout', {
                     method: 'POST',
                     credentials: 'include'
                 });
 
-                window.location.href = '/';
+                if (response.ok) {
+                    window.location.href = '/';
+                } else {
+                    window.location.href = '/';
+                }
             } catch (error) {
                 console.error('Logout error:', error);
                 window.location.href = '/';

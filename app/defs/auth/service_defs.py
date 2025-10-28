@@ -87,9 +87,10 @@ async def send_change_mail_email(email: EmailStr, username: str = None) -> None:
     expire_hours = getattr(settings, 'EMAIL_CHANGE_TOKEN_EXPIRE_HOURS', 24)
 
     # Получаем стилизованный HTML шаблон
-    html_content = get_password_reset_email_html(
+    html_content = get_change_email_html(
         username=username,
-        reset_link=reset_link,
+        verification_link=reset_link,
+        new_email=email,
         expire_hours=expire_hours
     )
 

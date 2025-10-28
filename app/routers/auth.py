@@ -129,19 +129,11 @@ async def change_email_verify(token: str, request: Request, user: User = Depends
             status_code=status.HTTP_400_BAD_REQUEST
         )
     
-    email_already_in_use = (await db.execute(
-        select(exists())
-        .where(User.email == email)
-    )).scalar()
-
-    if email_already_in_use:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email already in use")
-    
     user.email = email
     await db.commit()
 
-    return error_templates.TemplateResponse(
-            "email_change_success.html",
+    return templates.TemplateResponse(
+            "email-change-success.html",
             {"request": request},
             status_code=status.HTTP_200_OK
         )
@@ -250,7 +242,7 @@ async def login(
 
     if not user or not pwd_context.verify(form_data.password, user.hashed_password):
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
+            status_code=status.HTTP_403_FORBIDDEN,
             detail="Неверные учетные данные"
         )
 

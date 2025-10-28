@@ -4,6 +4,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from fastapi import status
 from app.routers.auth import router as auth_router
+from app.routers.profile import router as profile_router
 from app.routers import dashboard
 from app.defs.auth.jwt_handler import decode_jwt
 from app.config import settings
@@ -28,11 +29,14 @@ templates = Jinja2Templates(directory="templates")
 
 app.include_router(auth_router)
 app.include_router(dashboard.router)
+app.include_router(profile_router)
 
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     if exc.status_code == status.HTTP_404_NOT_FOUND:
         return templates.TemplateResponse("404.html", {"request": request}, status_code=404)
+    if exc.status_code == status.HTTP_401_UNAUTHORIZED:
+        return templates.TemplateResponse("index.html", {"request": request}, status_code=401)
     # if exc.status_code == status.HTTP_403_FORBIDDEN:
     #     return templates.TemplateResponse("403.html", {"request": request}, status_code=403)
     return HTMLResponse(str(exc.detail), status_code=exc.status_code)
