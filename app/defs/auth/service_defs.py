@@ -1,7 +1,7 @@
 from fastapi_mail import FastMail, MessageSchema, ConnectionConfig
 from pydantic import EmailStr
 from app.config import settings
-from app.defs.auth.mail_templates_defs import get_verification_email_html, get_password_reset_email_html, get_welcome_email_html
+from app.defs.auth.mail_templates_defs import get_verification_email_html, get_password_reset_email_html, get_welcome_email_html, get_change_email_html
 from app.defs.auth.email_utils import generate_verification_token
 
 mail_config = ConnectionConfig(
@@ -73,6 +73,36 @@ async def send_password_reset_email(email: EmailStr, reset_token: str, username:
     # Отправляем письмо
     await fastmail.send_message(message)
 
+async def send_change_mail_email(email: EmailStr, username: str = None) -> None:
+    """
+    Отправка письма для смены email
+    """
+    token = generate_verification_token(email)
+
+    reset_link = f"{settings.APP_URL}/auth/change-email?token={token}"
+
+    if not username:
+        username = email.split('@')[0]
+
+    expire_hours = getattr(settings, 'EMAIL_CHANGE_TOKEN_EXPIRE_HOURS', 24)
+
+    # Получаем стилизованный HTML шаблон
+    html_content = get_password_reset_email_html(
+        username=username,
+        reset_link=reset_link,
+        expire_hours=expire_hours
+    )
+
+    # Создаём сообщение
+    message = MessageSchema(
+        subject="Смена email - Brain Notes",
+        recipients=[email],
+        body=html_content,
+        subtype="html"
+    )
+
+    # Отправляем письмо
+    await fastmail.send_message(message)
 
 async def send_welcome_email(email: EmailStr, username: str) -> None:
     """

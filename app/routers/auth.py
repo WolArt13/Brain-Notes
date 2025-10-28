@@ -3,6 +3,7 @@ from fastapi import APIRouter, Depends, Form, HTTPException, Request, Response, 
 from fastapi.responses import HTMLResponse
 from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.templating import Jinja2Templates
+from sqlalchemy import exists
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from passlib.context import CryptContext
@@ -10,6 +11,7 @@ from datetime import timedelta
 
 from app.database import get_db
 from app.config import settings
+from app.defs.auth.dependencies import get_current_active_user
 from app.models.validators import ResendVerificationRequest
 from app.models.database import User
 from app.defs.auth.jwt_handler import create_access_token, create_refresh_token, decode_jwt
@@ -19,6 +21,7 @@ from app.defs.auth.service_defs import send_password_reset_email, send_verificat
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
 templates = Jinja2Templates(directory="templates/auth")
+error_templates = Jinja2Templates(directory="templates")
 
 pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
@@ -84,7 +87,7 @@ async def verify_email(
     try:
         email = verify_email_token(token)
     except ValueError as e:
-        return templates.TemplateResponse(
+        return error_templates.TemplateResponse(
             "403.html",
             {"request": request},
             status_code=status.HTTP_400_BAD_REQUEST
@@ -94,7 +97,7 @@ async def verify_email(
     user = result.scalar_one_or_none()
 
     if not user:
-        return templates.TemplateResponse(
+        return error_templates.TemplateResponse(
             "404.html",
             {"request": request},
             status_code=status.HTTP_404_NOT_FOUND
@@ -114,6 +117,34 @@ async def verify_email(
     )
 
     return templates.TemplateResponse("register_success.html", {"request": request})
+
+@router.get("/change-email")
+async def change_email_verify(token: str, request: Request, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    try:
+        email = verify_email_token(token)
+    except ValueError as e:
+        return error_templates.TemplateResponse(
+            "403.html",
+            {"request": request},
+            status_code=status.HTTP_400_BAD_REQUEST
+        )
+    
+    email_already_in_use = (await db.execute(
+        select(exists())
+        .where(User.email == email)
+    )).scalar()
+
+    if email_already_in_use:
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email already in use")
+    
+    user.email = email
+    await db.commit()
+
+    return error_templates.TemplateResponse(
+            "email_change_success.html",
+            {"request": request},
+            status_code=status.HTTP_200_OK
+        )
 
 @router.get("/me")
 async def get_current_user(
@@ -160,7 +191,8 @@ async def get_current_user(
         "username": user.username,
         "email": user.email,
         "full_name": user.full_name,
-        "is_verified": user.is_verified
+        "is_verified": user.is_verified,
+        "created_at": user.created_at
     }
 
 @router.post("/logout")

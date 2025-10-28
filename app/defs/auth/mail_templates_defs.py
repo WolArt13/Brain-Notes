@@ -141,6 +141,179 @@ def get_verification_email_html(username: str, verification_link: str) -> str:
 </html>
 '''
 
+def get_change_email_html(username: str, verification_link: str, expire_hours: int) -> str:
+    """
+    HTML шаблон для письма сброса пароля.
+    Стилизован в едином стиле Brain Notes с контрастными цветами.
+    """
+    return f'''
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сброс пароля - Brain Notes</title>
+    <style>
+        body {{
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f5f5;
+            color: #1a1a2e;
+        }}
+        .email-container {{
+            max-width: 600px;
+            margin: 40px auto;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }}
+        .header {{
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            padding: 40px 30px;
+            text-align: center;
+        }}
+        .header h1 {{
+            margin: 0;
+            font-size: 32px;
+            color: #ffffff;
+            font-weight: 700;
+        }}
+        .content {{
+            padding: 40px 30px;
+        }}
+        .greeting {{
+            font-size: 20px;
+            margin-bottom: 20px;
+            color: #1a1a2e;
+            font-weight: 600;
+        }}
+        .message {{
+            font-size: 16px;
+            line-height: 1.6;
+            color: #4a5568;
+            margin-bottom: 30px;
+        }}
+        .button-container {{
+            text-align: center;
+            margin: 40px 0;
+        }}
+        .reset-button {{
+            display: inline-block;
+            padding: 16px 40px;
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }}
+        .warning-box {{
+            background: #fef2f2;
+            border: 1px solid #fecaca;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 30px 0;
+        }}
+        .warning-title {{
+            font-size: 16px;
+            font-weight: 600;
+            color: #dc2626;
+            margin-bottom: 10px;
+        }}
+        .warning-text {{
+            font-size: 14px;
+            color: #7f1d1d;
+        }}
+        .link-section {{
+            margin-top: 30px;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }}
+        .link-label {{
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 10px;
+        }}
+        .link-text {{
+            font-size: 14px;
+            color: #00d9ff;
+            word-break: break-all;
+        }}
+        .footer {{
+            padding: 30px;
+            text-align: center;
+            color: #64748b;
+            font-size: 14px;
+            border-top: 1px solid #e2e8f0;
+            background: #f7fafc;
+        }}
+        .footer-logo {{
+            font-size: 18px;
+            font-weight: 600;
+            background: linear-gradient(135deg, #00d9ff, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }}
+        .expire-notice {{
+            text-align: center;
+            font-size: 14px;
+            color: #64748b;
+            margin-top: 20px;
+        }}
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <div class="header">
+            <h1>Brain Notes</h1>
+        </div>
+
+        <div class="content">
+            <div class="greeting">Здравствуйте, {username}!</div>
+
+            <div class="message">
+                Вы запросили смену email для вашей учётной записи в <strong>Brain Notes</strong>.
+            </div>
+
+            <div class="message">
+                Для подтверждения смены нажмите на кнопку ниже:
+            </div>
+
+            <div class="button-container">
+                <a href="{verification_link}" class="reset-button">Подтвердить</a>
+            </div>
+
+            <div class="expire-notice">
+                ⏱️ Ссылка действительна <strong>{expire_hours} часов</strong>
+            </div>
+
+            <div class="link-section">
+                <div class="link-label">Или скопируйте и вставьте ссылку в браузер:</div>
+                <div class="link-text">{verification_link}</div>
+            </div>
+
+            <div class="warning-box">
+                <div class="warning-title">⚠️ Важная информация</div>
+                <div class="warning-text">
+                    Если вы не запрашивали смену email, просто проигнорируйте это письмо. 
+                    Ваш email останется без изменений. Никому не сообщайте эту ссылку.
+                </div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <div class="footer-logo">Brain Notes</div>
+            <div>Организуйте свои мысли. Создавайте связи. Развивайтесь.</div>
+        </div>
+    </div>
+</body>
+</html>
+'''
 
 def get_password_reset_email_html(username: str, reset_link: str, expire_hours: int) -> str:
     """
