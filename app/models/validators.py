@@ -3,7 +3,7 @@ from pydantic import BaseModel, EmailStr, Field, ValidationError
 from typing import Optional
 from datetime import datetime
 
-from sqlalchemy import UUID
+from uuid import UUID
 
 class UserBase(BaseModel):
     """Общие поля пользователя"""
@@ -50,12 +50,12 @@ class NewFolderUpdate(BaseModel):
 
 class NewNoteCreate(BaseModel):
     header: Optional[str] = Field(None, max_length=50)
-    body: str
+    content: str
     folder_id: Optional[UUID] = Field(None)
 
 class NoteUpdate(BaseModel):
     header: Optional[str] = Field(None, max_length=50)
-    body: Optional[str]
+    content: Optional[str]
     folder_id: Optional[UUID] = Field(None)
 
 async def validate_data(data, validation_class):

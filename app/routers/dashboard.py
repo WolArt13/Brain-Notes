@@ -50,16 +50,25 @@ async def note_create(data: dict, request: Request, user: User = Depends(get_cur
     dashboard = Dashboard(db_conn=db)
 
     title = data.get('title')
-    body = data.get('body')
+    content = data.get('content')
     folder_id = data.get('folder_id')
-    note = await dashboard.new_note(user.id, title, body, folder_id)
+    note = await dashboard.new_note(user.id, title, content, folder_id)
 
     return note
 
 @router.post("/tree")
 async def get_tree(request: Request, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
     """Получить древовидную структуру заметок и папок"""
-    await db.refresh(user, ["folders", "notes"])
+    try:
+        dashboard = Dashboard(db)
+
+        res = await dashboard.get_tree(user)
+
+        return res
+    except Exception as e:
+        print(str(e))
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal server error")
+
 
 @router.post("/notes")
 async def get_all_notes(request: Request, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):

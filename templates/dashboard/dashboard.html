@@ -575,7 +575,7 @@
                 </div>
                 <div class="form-group">
                     <label for="noteBody">Содержание</label>
-                    <textarea id="noteBody" name="body" required placeholder="Начните писать..."></textarea>
+                    <textarea id="noteBody" name="content" required placeholder="Начните писать..."></textarea>
                 </div>
                 <button type="submit" class="submit-btn">Создать заметку</button>
             </form>
@@ -597,7 +597,7 @@
                 </div>
                 <div class="form-group">
                     <label for="editNoteBody">Содержание</label>
-                    <textarea id="editNoteBody" name="body" required placeholder="Начните писать..."></textarea>
+                    <textarea id="editNoteBody" name="content" required placeholder="Начните писать..."></textarea>
                 </div>
                 <button type="submit" class="submit-btn">Сохранить изменения</button>
                 <button type="button" class="delete-btn" onclick="confirmDeleteNote()">Удалить заметку</button>
@@ -774,9 +774,9 @@
             event.preventDefault();
 
             const title = document.getElementById('noteTitle').value.trim();
-            const body = document.getElementById('noteBody').value.trim();
+            const content = document.getElementById('noteBody').value.trim();
 
-            const noteData = { body };
+            const noteData = { content };
             if (title) {
                 noteData.title = title;
             }
@@ -852,14 +852,14 @@
 
             const noteId = document.getElementById('editNoteId').value;
             const title = document.getElementById('editNoteTitle').value.trim();
-            const body = document.getElementById('editNoteBody').value.trim();
+            const content = document.getElementById('editNoteBody').value.trim();
 
             if (!noteId) {
                 console.error('Note ID is missing');
                 return;
             }
 
-            const noteData = { body };
+            const noteData = { content };
             if (title) {
                 noteData.title = title;
             }
