@@ -111,11 +111,11 @@ class Dashboard:
 
         return new_folder
     
-    async def update_folder(self, folder_id, user: User, **kwargs):
+    async def update_folder(self, source_id, user: User, **kwargs):
         title = kwargs.get('title')
         parent_id = kwargs.get('folder_id')
 
-        folder = (await self.db.execute(select(Folder).where(Folder.id == folder_id, Folder.user_id == user.id))).scalar_one_or_none()
+        folder = (await self.db.execute(select(Folder).where(Folder.id == source_id, Folder.user_id == user.id))).scalar_one_or_none()
 
         if folder:
             if title:
