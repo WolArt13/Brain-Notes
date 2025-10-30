@@ -608,7 +608,7 @@
                 <ul class="tree" id="treeContainer"></ul>
             </div>
             <div class="root-drop-zone" id="rootDropZone" ondragover="handleRootDragOver(event)" ondrop="handleRootDrop(event)">
-                📌 Перетащи сюда в корень
+                📌 Переместить в корень
             </div>
         </div>
 
@@ -630,7 +630,7 @@
                 <button class="modal-close" onclick="closeNewNoteModal()">&times;</button>
             </div>
             <div class="modal-form">
-                <input type="text" id="newNoteTitle" class="modal-input" placeholder="Название" />
+                <input type="text" id="newNoteTitle" class="modal-input" placeholder="Название" maxlength="50" />
                 <textarea id="newNoteContent" class="modal-textarea" placeholder="Содержание (опционально)"></textarea>
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="createNote()">Создать</button>
@@ -647,7 +647,7 @@
                 <button class="modal-close" onclick="closeNewFolderModal()">&times;</button>
             </div>
             <div class="modal-form">
-                <input type="text" id="newFolderTitle" class="modal-input" placeholder="Название папки" />
+                <input type="text" id="newFolderTitle" class="modal-input" placeholder="Название папки", maxlength="50" />
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="createFolder()">Создать</button>
                     <button class="btn btn-cancel" onclick="closeNewFolderModal()">Отмена</button>
@@ -782,6 +782,18 @@
         function renderTree() {
             const container = document.getElementById('treeContainer');
             container.innerHTML = '';
+
+            if (tree.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 40px 20px; color: #9397ad;">
+                        <div style="font-size: 2rem; margin-bottom: 12px; opacity: 0.5;">📝</div>
+                        <div style="font-size: 0.95rem;">Тут пока пусто</div>
+                        <div style="font-size: 0.85rem; margin-top: 8px; color: #7a7e94;">Создайте свою первую заметку</div>
+                    </div>
+                `;
+                return;
+            }
+
             tree.forEach(item => {
                 container.appendChild(renderTreeItem(item));
             });

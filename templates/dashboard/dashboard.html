@@ -147,8 +147,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
         }
 
         .sidebar-btn:hover {
@@ -608,7 +608,7 @@
                 <ul class="tree" id="treeContainer"></ul>
             </div>
             <div class="root-drop-zone" id="rootDropZone" ondragover="handleRootDragOver(event)" ondrop="handleRootDrop(event)">
-                📌 Перетащи сюда в корень
+                📌 Переместить в корень
             </div>
         </div>
 
@@ -630,7 +630,7 @@
                 <button class="modal-close" onclick="closeNewNoteModal()">&times;</button>
             </div>
             <div class="modal-form">
-                <input type="text" id="newNoteTitle" class="modal-input" placeholder="Название" />
+                <input type="text" id="newNoteTitle" class="modal-input" placeholder="Название" maxlength="50" />
                 <textarea id="newNoteContent" class="modal-textarea" placeholder="Содержание (опционально)"></textarea>
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="createNote()">Создать</button>
@@ -647,7 +647,7 @@
                 <button class="modal-close" onclick="closeNewFolderModal()">&times;</button>
             </div>
             <div class="modal-form">
-                <input type="text" id="newFolderTitle" class="modal-input" placeholder="Название папки" />
+                <input type="text" id="newFolderTitle" class="modal-input" placeholder="Название папки", maxlength="50" />
                 <div class="modal-actions">
                     <button class="btn btn-primary" onclick="createFolder()">Создать</button>
                     <button class="btn btn-cancel" onclick="closeNewFolderModal()">Отмена</button>

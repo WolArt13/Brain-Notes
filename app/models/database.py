@@ -43,10 +43,8 @@ class Folder(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 
-    # Отношение к пользователю
     user = relationship("User", back_populates="folders")
     
-    # Отношение к заметкам в этой папке
     notes = relationship(
         "Note", 
         back_populates="folder",
@@ -54,13 +52,12 @@ class Folder(Base):
         foreign_keys="Note.folder_id"
     )
 
-    # Отношение для вложенных папок - с single_parent=True
     children = relationship(
         "Folder",
         backref="parent",
         remote_side=[id],
-        cascade="all, delete-orphan",  # Это теперь работает
-        single_parent=True,  # ← ДОБАВИЛ ЭТО
+        cascade="all, delete-orphan",
+        single_parent=True,
         foreign_keys=[parent_id]
     )
 
