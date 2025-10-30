@@ -42,7 +42,7 @@ class ResendVerificationRequest(BaseModel):
 
 class NewFolderCreate(BaseModel):
     title: str
-    folder_id: Optional[UUID]
+    folder_id: Optional[UUID] = Field(None)
 
 class NewFolderUpdate(BaseModel):
     title: str
