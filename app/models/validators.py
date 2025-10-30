@@ -3,6 +3,8 @@ from pydantic import BaseModel, EmailStr, Field, ValidationError
 from typing import Optional
 from datetime import datetime
 
+from sqlalchemy import UUID
+
 class UserBase(BaseModel):
     """Общие поля пользователя"""
     username: str = Field(..., min_length=3, max_length=50)
@@ -38,13 +40,23 @@ class ResetPasswordRequest(BaseModel):
 class ResendVerificationRequest(BaseModel):
     email: EmailStr
 
+class NewFolderCreate(BaseModel):
+    title: str
+    parent_id: Optional[UUID]
+
+class NewFolderUpdate(BaseModel):
+    title: str
+    parent_id: Optional[UUID]
+
 class NewNoteCreate(BaseModel):
     header: Optional[str] = Field(None, max_length=50)
     body: str
+    folder_id: Optional[UUID] = Field(None)
 
 class NoteUpdate(BaseModel):
     header: Optional[str] = Field(None, max_length=50)
     body: Optional[str]
+    folder_id: Optional[UUID] = Field(None)
 
 async def validate_data(data, validation_class):
     try:

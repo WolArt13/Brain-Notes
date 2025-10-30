@@ -8,7 +8,7 @@ from app.defs.auth.jwt_handler import decode_jwt
 from app.database import get_db
 from app.defs.dashboard.defs import Dashboard
 from app.models.database import User
-from app.models.validators import NewNoteCreate, NoteUpdate, validate_data
+from app.models.validators import NewFolderCreate, NewFolderUpdate, NewNoteCreate, NoteUpdate, validate_data
 from app.defs.auth.dependencies import get_current_active_user, get_current_user
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
@@ -51,10 +51,16 @@ async def note_create(data: dict, request: Request, user: User = Depends(get_cur
 
     title = data.get('title')
     body = data.get('body')
-    note = await dashboard.new_note(user.id, title, body)
+    folder_id = data.get('folder_id')
+    note = await dashboard.new_note(user.id, title, body, folder_id)
 
     return note
-    
+
+@router.post("/tree")
+async def get_tree(request: Request, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    """Получить древовидную структуру заметок и папок"""
+    await db.refresh(user, ["folders", "notes"])
+
 @router.post("/notes")
 async def get_all_notes(request: Request, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
     await db.refresh(user, ["notes"])
@@ -71,9 +77,37 @@ async def update_note(request: Request, note_id, data = Body(), user: User = Dep
     return res
 
 @router.delete("/note/{note_id}")
-async def update_note(request: Request, note_id, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+async def delete_note(request: Request, note_id, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
     dashboard = Dashboard(db)
     
     res = await dashboard.delete_note(user, note_id)
+
+    return res
+
+@router.put("/folder")
+async def new_folder(data: dict, request: Request, user: User = Depends(get_current_user), db: AsyncSession = Depends(get_db)):
+    await validate_data(data, NewFolderCreate)
+
+    dashboard = Dashboard(db_conn=db)
+
+    note = await dashboard.new_folder(user, **data)
+
+    return note
+
+@router.post("/folder/{folder_id}")
+async def update_folder(request: Request, folder_id, data = Body(), user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    await validate_data(data, NewFolderUpdate)
+
+    dashboard = Dashboard(db_conn=db)
+
+    note = await dashboard.update_folder(folder_id, user, **data)
+
+    return note
+
+@router.delete("/folder/{folder_id}")
+async def delete_note(request: Request, folder_id, user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
+    dashboard = Dashboard(db)
+    
+    res = await dashboard.delete_folder(folder_id, user)
 
     return res
