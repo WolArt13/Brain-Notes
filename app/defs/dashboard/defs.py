@@ -176,6 +176,8 @@ class Dashboard:
         
         # 3. Рекурсивно строим дерево
         def build_folder_tree(folder: Folder) -> Dict[str, Any]:
+            children_folders = folder.children if folder.children else []
+            children_notes = folder.notes if folder.notes else []
             return {
                 "id": str(folder.id),
                 "title": folder.title,
@@ -183,8 +185,8 @@ class Dashboard:
                 "created_at": folder.created_at.isoformat() if folder.created_at else None,
                 "updated_at": folder.updated_at.isoformat() if folder.updated_at else None,
                 "children": [
-                    *[build_folder_tree(child) for child in folder.children],
-                    *[build_note_item(note) for note in folder.notes]
+                    *[build_folder_tree(child) for child in children_folders],
+                    *[build_note_item(note) for note in children_notes]
                 ]
             }
         
