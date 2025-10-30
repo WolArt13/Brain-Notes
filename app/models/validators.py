@@ -42,11 +42,11 @@ class ResendVerificationRequest(BaseModel):
 
 class NewFolderCreate(BaseModel):
     title: str
-    parent_id: Optional[UUID]
+    folder_id: Optional[UUID]
 
 class NewFolderUpdate(BaseModel):
     title: str
-    parent_id: Optional[UUID]
+    folder_id: Optional[UUID]
 
 class NewNoteCreate(BaseModel):
     header: Optional[str] = Field(None, max_length=50)

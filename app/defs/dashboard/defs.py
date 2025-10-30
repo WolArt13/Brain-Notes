@@ -38,30 +38,44 @@ class Dashboard:
         folder_id = kwargs.get('folder_id')
 
         values = {}
-        if title:
-            values['title'] = title
-        if body:
-            values['content'] = body
-        if folder_id:
-            values['folder_id'] = folder_id
-
         try:
+            if title or body:
+                if title:
+                    values['title'] = title
+                if body:
+                    values['content'] = body
+
+                res = (await self.db.execute(
+                    update(Note)
+                    .where(Note.id == str(source_id), Note.user_id == int(user.id))
+                    .values(**values)
+                    .returning(Note.id)
+                )).scalar_one_or_none()
+
+                if not res:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+                
+                await self.db.commit()
+
+                return {"status": "ok", "message": "Note successfully updated"}
+            
             res = (await self.db.execute(
                 update(Note)
                 .where(Note.id == str(source_id), Note.user_id == int(user.id))
-                .values(**values)
+                .values(folder_id = folder_id)
                 .returning(Note.id)
-            )).scalar_one_or_none()
+            ))
+
+            if not res:
+                    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
+                
+            await self.db.commit()
+
+            return {"status": "ok", "message": "Note successfully updated"}
+
         except Exception as e:
             print(str(e))
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")
-        
-        await self.db.commit()
-
-        if not res:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Note not found")
-        
-        return {"status": "ok", "message": "Note successfully updated"}
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Internal Server Error")    
     
     async def delete_note(self, user: Note, source_id):
         try:
@@ -99,23 +113,28 @@ class Dashboard:
     
     async def update_folder(self, folder_id, user: User, **kwargs):
         title = kwargs.get('title')
-        parent_id = kwargs.get('parent_id')
+        parent_id = kwargs.get('folder_id')
 
         folder = (await self.db.execute(select(Folder).where(Folder.id == folder_id, Folder.user_id == user.id))).scalar_one_or_none()
 
         if folder:
             if title:
                 folder.title = title
-            if parent_id:
-                folder.parent_id = parent_id
 
+                await self.db.commit()
+                return {
+                    "message": "Folder successfully updated"
+                }
+                
+            folder.parent_id = parent_id
             await self.db.commit()
+
+            return {
+                    "message": "Folder successfully updated"
+            }
+            
         else:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Folder not found")
-        
-        return {
-            "message": "Folder successfully updated"
-        }
     
     async def delete_folder(self, folder_id, user: User):
         res = (await self.db.execute(
