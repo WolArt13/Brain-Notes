@@ -63,16 +63,6 @@
             box-shadow: 0 4px 12px rgba(79, 172, 254, 0.4);
         }
 
-        .btn-secondary {
-            background: rgba(79, 172, 254, 0.1);
-            border: 1px solid rgba(79, 172, 254, 0.3);
-            color: #4facfe;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(79, 172, 254, 0.2);
-        }
-
         .btn-logout {
             background: rgba(244, 63, 94, 0.1);
             border: 1px solid rgba(244, 63, 94, 0.3);
@@ -156,6 +146,8 @@
             height: 20px;
             font-size: 0.8rem;
             color: #9397ad;
+            cursor: pointer;
+            transition: transform 0.2s;
         }
 
         .tree-toggle.open {
@@ -164,6 +156,7 @@
 
         .tree-icon {
             font-size: 1rem;
+            flex-shrink: 0;
         }
 
         .tree-label {
@@ -460,7 +453,7 @@
         <div class="logo">Brain Notes</div>
         <div class="header-actions">
             <button class="btn btn-primary" id="newNoteBtn">📝 Новая заметка</button>
-            <button class="btn btn-secondary" id="newFolderBtn">📁 Новая папка</button>
+            <button class="btn btn-primary" id="newFolderBtn">📁 Новая папка</button>
             <button class="btn btn-logout" id="logoutBtn">Выйти</button>
         </div>
     </div>
@@ -537,7 +530,7 @@
         let tree = [];
         let deleteCallback = null;
         let refreshTokenInterval = null;
-        let currentParentFolderId = null; // Для создания заметок в папке
+        let currentParentFolderId = null;
 
         // Обновление токена
         async function refreshAccessToken() {
@@ -564,12 +557,14 @@
             if (refreshTokenInterval) clearInterval(refreshTokenInterval);
         }
 
-        // Загрузка дерева
+        // Загрузка дерева - POST /dashboard/tree
         async function loadTree() {
             try {
                 const response = await fetch('/dashboard/tree', {
-                    method: 'GET',
-                    credentials: 'include'
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({})
                 });
                 if (!response.ok) throw new Error('Ошибка загрузки дерева');
                 tree = await response.json();
@@ -599,7 +594,7 @@
             nodeDiv.className = `tree-node ${item.type}`;
             nodeDiv.draggable = true;
 
-            // Иконка раскрытия
+            // Иконка раскрытия для папок
             if (item.type === 'folder' && item.children && item.children.length > 0) {
                 const toggle = document.createElement('span');
                 toggle.className = 'tree-toggle';
@@ -687,10 +682,9 @@
                 const draggedId = e.dataTransfer.getData('itemId');
                 const draggedType = e.dataTransfer.getData('itemType');
 
-                if (draggedId === item.id) return; // Нельзя перетащить в себя
-                if (item.type === 'note') return; // Нельзя перетащить в заметку
+                if (draggedId === item.id) return;
+                if (item.type === 'note') return;
 
-                // Перемещаем элемент
                 moveItem(draggedId, draggedType, item.id);
             };
 
@@ -745,7 +739,7 @@
                 contentBody.innerHTML = `
                     <div class="empty-state">
                         <div class="empty-icon">📁</div>
-                        <div class="empty-title">${item.title}</div>
+                        <div class="empty-title">${escapeHtml(item.title)}</div>
                         <div>Выберите заметку для просмотра</div>
                     </div>
                 `;
@@ -809,14 +803,14 @@
                 currentItem.title = title;
                 currentItem.content = content;
                 renderContent(currentItem);
-                loadTree(); // Обновляем дерево
+                loadTree();
             } catch (error) {
                 console.error('Error saving note:', error);
                 showError('Ошибка сохранения заметки');
             }
         }
 
-        // Создание заметки
+        // Создание заметки (PUT)
         async function createNote() {
             const title = document.getElementById('newNoteTitle').value.trim();
             if (!title) return;
@@ -843,19 +837,18 @@
             }
         }
 
-        // Создание папки
+        // Создание папки (PUT)
         async function createFolder() {
             const title = document.getElementById('newFolderTitle').value.trim();
             if (!title) return;
 
             try {
                 const response = await fetch('/dashboard/folder', {
-                    method: 'POST',
+                    method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
                     body: JSON.stringify({
-                        title,
-                        parent_id: currentParentFolderId || null
+                        title
                     })
                 });
 
@@ -869,7 +862,7 @@
             }
         }
 
-        // Перемещение элемента
+        // Перемещение элемента (ТОЛЬКО folder_id)
         async function moveItem(itemId, itemType, parentId) {
             try {
                 const endpoint = itemType === 'folder' 
@@ -880,7 +873,9 @@
                     method: 'PATCH',
                     headers: { 'Content-Type': 'application/json' },
                     credentials: 'include',
-                    body: JSON.stringify({ folder_id: parentId === 'root' ? null : parentId })
+                    body: JSON.stringify({ 
+                        folder_id: parentId
+                    })
                 });
 
                 if (!response.ok) throw new Error('Ошибка перемещения');
@@ -988,7 +983,7 @@
         }
 
         function showError(message) {
-            alert(message); // В продакшене лучше использовать toast
+            alert(message);
         }
 
         // Инициализация

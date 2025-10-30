@@ -45,17 +45,17 @@ class NewFolderCreate(BaseModel):
     folder_id: Optional[UUID] = Field(None)
 
 class NewFolderUpdate(BaseModel):
-    title: str
-    folder_id: Optional[UUID]
+    title: Optional[str] = Field(None, max_length=50)
+    folder_id: Optional[UUID] = Field(None)
 
 class NewNoteCreate(BaseModel):
-    header: Optional[str] = Field(None, max_length=50)
+    title: Optional[str] = Field(None, max_length=50)
     content: str
     folder_id: Optional[UUID] = Field(None)
 
 class NoteUpdate(BaseModel):
-    header: Optional[str] = Field(None, max_length=50)
-    content: Optional[str]
+    title: Optional[str] = Field(None, max_length=50)
+    content: Optional[str] = FileExistsError(None)
     folder_id: Optional[UUID] = Field(None)
 
 async def validate_data(data, validation_class):

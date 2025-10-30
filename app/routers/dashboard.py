@@ -103,12 +103,10 @@ async def new_folder(data: dict, request: Request, user: User = Depends(get_curr
 
     return note
 
-@router.post("/folder/{folder_id}")
+@router.patch("/folder/{folder_id}")
 async def update_folder(request: Request, folder_id, data = Body(), user: User = Depends(get_current_active_user), db: AsyncSession = Depends(get_db)):
     await validate_data(data, NewFolderUpdate)
-
     dashboard = Dashboard(db_conn=db)
-
     note = await dashboard.update_folder(folder_id, user, **data)
 
     return note
