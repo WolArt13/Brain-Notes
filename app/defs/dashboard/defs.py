@@ -1,4 +1,5 @@
 from typing import Any, Dict, List
+from uuid import UUID
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncConnection
 from sqlalchemy import delete, select, update
@@ -146,26 +147,26 @@ class Dashboard:
         if not res:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Folder not found")
         
+        await self.db.commit()
+        
         return {
             "message": "Folder successfully deleted"
         }
     
     async def get_tree(self, user: User) -> List[Dict[str, Any]]:
         """Получить древовидную структуру папок и заметок"""
-    
-        # 1. Получаем все корневые папки (parent_id = None) с их дочерними элементами
-        root_folders_query = select(Folder).where(
-            Folder.user_id == user.id,
-            Folder.parent_id == None
+        
+        # 1. Получаем ВСЕ папки пользователя (без joinedload, просто как есть)
+        all_folders_query = select(Folder).where(
+            Folder.user_id == user.id
         ).options(
-            selectinload(Folder.children),  # предзагрузка дочерних папок
-            selectinload(Folder.notes)      # предзагрузка заметок в папке
+            selectinload(Folder.notes)  # Загружаем заметки для каждой папки
         )
         
-        result = await self.db.execute(root_folders_query)
-        root_folders = result.scalars().all()
+        result = await self.db.execute(all_folders_query)
+        all_folders = result.scalars().unique().all()
         
-        # 2. Получаем заметки без папки (корневые заметки)
+        # 2. Получаем корневые заметки
         root_notes_query = select(Note).where(
             Note.user_id == user.id,
             Note.folder_id == None
@@ -174,10 +175,24 @@ class Dashboard:
         result = await self.db.execute(root_notes_query)
         root_notes = result.scalars().all()
         
-        # 3. Рекурсивно строим дерево
-        def build_folder_tree(folder: Folder) -> Dict[str, Any]:
-            children_folders = folder.children if folder.children else []
+        # 3. Создаём индекс папок по ID для быстрого поиска
+        folders_by_id = {folder.id: folder for folder in all_folders}
+        
+        # 4. Рекурсивно строим дерево
+        def build_folder_tree(folder_id: UUID) -> Dict[str, Any]:
+            folder = folders_by_id.get(folder_id)
+            if not folder:
+                return None
+            
+            # Находим дочерние папки (у которых parent_id == folder_id)
+            children_folders = [
+                f for f in all_folders 
+                if f.parent_id == folder_id
+            ]
+            
+            # Заметки в этой папке
             children_notes = folder.notes if folder.notes else []
+            
             return {
                 "id": str(folder.id),
                 "title": folder.title,
@@ -185,7 +200,7 @@ class Dashboard:
                 "created_at": folder.created_at.isoformat() if folder.created_at else None,
                 "updated_at": folder.updated_at.isoformat() if folder.updated_at else None,
                 "children": [
-                    *[build_folder_tree(child) for child in children_folders],
+                    *[build_folder_tree(child.id) for child in children_folders],
                     *[build_note_item(note) for note in children_notes]
                 ]
             }
@@ -200,9 +215,11 @@ class Dashboard:
                 "updated_at": note.updated_at.isoformat() if note.updated_at else None
             }
         
-        # 4. Формируем итоговое дерево
+        # 5. Формируем итоговое дерево - только корневые папки
+        root_folders = [f for f in all_folders if f.parent_id is None]
+        
         tree = [
-            *[build_folder_tree(folder) for folder in root_folders],
+            *[build_folder_tree(folder.id) for folder in root_folders],
             *[build_note_item(note) for note in root_notes]
         ]
         
