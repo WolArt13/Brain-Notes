@@ -147,8 +147,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 32px;
-            height: 32px;
+            width: 26px;
+            height: 26px;
         }
 
         .sidebar-btn:hover {
@@ -607,7 +607,7 @@
             <div class="tree-container">
                 <ul class="tree" id="treeContainer"></ul>
             </div>
-            <div class="root-drop-zone" id="rootDropZone" ondragover="handleRootDragOver(event)" ondrop="handleRootDrop(event)">
+            <div class="root-drop-zone" id="rootDropZone" ondragover="handleRootDragOver(event)" ondrop="handleRootDrop(event)", ondragleave="handleRootDropZoneLeave(event)">
                 📌 Переместить в корень
             </div>
         </div>
@@ -1258,6 +1258,10 @@
             if (draggedId) {
                 moveItem(draggedId, draggedType, null);
             }
+        }
+
+        function handleRootDropZoneLeave(e) {
+            document.getElementById('rootDropZone').classList.remove('active');
         }
     </script>
 </body>

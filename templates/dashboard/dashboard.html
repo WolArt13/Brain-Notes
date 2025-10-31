@@ -839,18 +839,21 @@
             const actions = document.createElement('div');
             actions.className = 'tree-actions';
 
-            if (item.type === 'note') {
-                const editBtn = document.createElement('button');
-                editBtn.className = 'tree-action-btn';
-                editBtn.textContent = '✏️';
-                editBtn.title = 'Редактировать';
-                editBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    selectItem(item);
+            // Карандаш для редактирования
+            const editBtn = document.createElement('button');
+            editBtn.className = 'tree-action-btn';
+            editBtn.textContent = '✏️';
+            editBtn.title = 'Редактировать';
+            editBtn.onclick = (e) => {
+                e.stopPropagation();
+                selectItem(item);
+                if (item.type === 'note') {
                     enterEditMode();
-                };
-                actions.appendChild(editBtn);
-            }
+                } else if (item.type === 'folder') {
+                    enterEditFolderMode();
+                }
+            };
+            actions.appendChild(editBtn);
 
             const deleteBtn = document.createElement('button');
             deleteBtn.className = 'tree-action-btn';
@@ -1028,6 +1031,79 @@
             } catch (error) {
                 console.error('Error saving note:', error);
                 showError('Ошибка сохранения заметки');
+            }
+        }
+
+        function enterEditFolderMode() {
+            if (!currentItem || currentItem.type !== 'folder') return;
+
+            const contentBody = document.getElementById('contentBody');
+            contentBody.innerHTML = `
+                <div class="editor">
+                    <div class="editor-field">
+                        <label class="editor-label">Название папки</label>
+                        <input type="text" id="editFolderNameInput" class="editor-input" value="${escapeHtml(currentItem.title)}" />
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn-save" onclick="saveFolderName()">✅ Сохранить</button>
+                        <button class="btn-cancel" onclick="cancelEditFolder()">❌ Отмена</button>
+                        <button class="btn-delete" onclick="deleteCurrentFolder()">🗑️ Удалить</button>
+                    </div>
+                </div>
+            `;
+            setTimeout(() => {
+                const input = document.getElementById('editFolderNameInput');
+                if (input) {
+                    input.focus();
+                    input.select();
+                }
+            }, 0);
+        }
+
+        function cancelEditFolder() {
+            if (currentItem) renderContent(currentItem);
+        }
+
+        async function saveFolderName() {
+            if (!currentItem || currentItem.type !== 'folder') return;
+
+            const title = document.getElementById('editFolderNameInput').value.trim();
+
+            if (!title) {
+                showError('Название папки не может быть пустым');
+                return;
+            }
+
+            if (title === currentItem.title) {
+                cancelEditFolder();
+                return;
+            }
+
+            try {
+                const response = await fetch(`/dashboard/folder/${currentItem.id}`, {
+                    method: 'PATCH',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ title })
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || 'Ошибка при изменении названия папки');
+                }
+
+                currentItem.title = title;
+                renderContent(currentItem);
+                loadTree();
+            } catch (error) {
+                console.error('Error saving folder name:', error);
+                showError(error.message || 'Ошибка при изменении названия папки');
+            }
+        }
+
+        function deleteCurrentFolder() {
+            if (currentItem && currentItem.type === 'folder') {
+                showDeleteConfirm(currentItem);
             }
         }
 
